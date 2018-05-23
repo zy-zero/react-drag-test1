@@ -1,0 +1,13 @@
+.AComponent{
+  border: 1px solid #ddd;
+  width: 200px;
+  height: 150px;
+  background: rgb(177, 177, 177);
+	position: absolute;
+}
+.AComponent:hover{
+  cursor: pointer;
+}
+.CComponent{
+  margin-top: 300px;
+}
