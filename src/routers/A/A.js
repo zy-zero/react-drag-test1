@@ -8,49 +8,31 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
     AtoMouseTop: 0,
     AtoMouseLeft: 0,
     isDraged: false,
+    isDragedOver:false,
+    container:{},
+    initLeft:0,
     ALeftBeforNexteMOve: 0,
     leftCount: 0,
     rightCount: 0,
-    AclassNames: ['AComponent'],
+    AclassNames: ['AComponent']
   }
-  // initial
-  componentDidMount() {
-    let divcontainer = document.getElementById('container1');
-    let initLeft = (divcontainer.offsetWidth/2) - 100;
-    this.props.A_init({initLeft});
-    let style = document.createElement('style');
-    style.type = 'text/css';
-    let keyFrames = 
-    '.AComponentAnimation\n'+
-    '{\n'+
-      'animation:animated_div 3s 1;\n'+
-      '-moz-animation: animated_div 3s 1;\n'+
-      '-o-animation: animated_div 3s 1;\n'+
-      '-webkit-animation:animated_div 3s 1;\n'+
-    '}\n'+
-    '@keyframes animated_div {\n'+
-      '100%	{transform: rotate(-360deg);left:'+initLeft+'px;}\n'+
-    '}\n'+
-    '@-webkit-keyframes animated_div {\n'+
-      '100%	{-webkit-transform: rotate(-360deg);left:'+initLeft+'px;}\n'+
-    '}\n'+
-    '@-moz-keyframes animated_div{\n'+
-    '100% {-moz-transform: rotate(-360deg);left:'+initLeft+'px;}'+
-    '}\n'+
-    '@-o-keyframes animated_div{\n'+
-    '100% {transform: rotate(-360deg);left:'+initLeft+'px;}'+
-    '}\n'
-    ;
-    style.innerHTML = keyFrames.replace(/A_DYNAMIC_VALUE/g, "180deg");
-    document.getElementsByTagName('head')[0].appendChild(style);
+  componentWillReceiveProps(nextProps) {
+      let initLeft = (nextProps.container.offsetWidth/2) - 100;
+      if (initLeft!==this.state.initLeft){
+          this.setState({
+              container:nextProps.container,
+              initLeft: initLeft,
+          });
+          this.props.A_init({initLeft});
+      }
   }
   // mouse function
   start = (e) => {
-    this.moveStart('container1', 'AComponent', e);
+    this.moveStart(e);
   }
   move = (e) => {
     if(this.state.isDraged){
-      this.moving('container1', 'AComponent', e);
+      this.moving(e);
     }
     
   }
@@ -68,11 +50,12 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
   }
   // touch function
   touchStart = (e) => {
-    this.moveStart('container1', 'AComponent', e.targetTouches[0]);
+    this.moveStart(e.targetTouches[0]);
+
   }
   touchMove = (e) => {
     if(this.state.isDraged){
-      this.moving('container1', 'AComponent', e.targetTouches[0]);
+      this.moving(e.targetTouches[0]);
     }
   }
   touchEnd = (e) => {
@@ -80,26 +63,26 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
       this.moveEnd();
       this.reduction();
     }
-    
   }
 
 
   // public function
-  moveStart = (containerId, aId, page) => {
-    let aComponent = document.getElementById(aId);
-    let divcontainer = document.getElementById(containerId);
+  moveStart = (page) => {
+    let aComponent = this.refs.AComponent;
+    let divcontainer = this.state.container;
     // 获取鼠标的位置和AComponent的差值
     this.setState({
       AtoMouseTop: divcontainer.offsetTop + aComponent.offsetTop - page.pageY,
       AtoMouseLeft: divcontainer.offsetLeft + aComponent.offsetLeft - page.pageX,
       isDraged: true,
+      isDragedOver: false,
       AclassNames: ['AComponent']
     });
   }
-  moving = (containerId, aId, page) => {
+  moving = (page) => {
     // 外框
-    let divcontainer = document.getElementById(containerId);
-    let aComponent = document.getElementById(aId);
+    let aComponent = this.refs.AComponent;
+    let divcontainer = this.state.container;
     let b = this.props.B;
     let c = this.props.C;
     let aleft = page.pageX - divcontainer.offsetLeft + this.state.AtoMouseLeft;
@@ -141,9 +124,9 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
     this.props.A_movaDrag({aleft, b, c});
   }
   moveEnd = ()=>{
-    // let aComponent = document.getElementById('AComponent');
     this.setState({
       isDraged: false,
+      isDragedOver: true,
       AclassNames: ['AComponent', 'AComponentAnimation']
     });
   }
@@ -157,11 +140,17 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
   }
   render() {
     // this.props;
+      let styleObj = {
+          top: this.props.ATop,
+          left: this.state.isDragedOver?this.state.initLeft:this.props.ALeft,
+          transform: this.state.isDragedOver?'rotate(-360deg)':'',
+          transition: this.state.isDragedOver?'all 3s':'',
+      }
     return (
       <div
-        id="AComponent"
+        id="AComponent" ref="AComponent"
         className={this.state.AclassNames.join(" ")}
-        style={{top: this.props.ATop, left: this.props.ALeft}}
+        style={styleObj}
         onMouseDown={this.start}
         onMouseMove={this.move}
         onMouseUp={this.end}
@@ -172,6 +161,7 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
       >
         A = {this.props.A}<br/>
       </div>
+
     );
   }
 }
