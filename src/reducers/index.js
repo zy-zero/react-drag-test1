@@ -4,7 +4,7 @@ import {
   A_START,
   A_MOVE,
   A_END,
-} from '../actions';
+} from '../actions/index';
 
 export let initialState = {
   entities:{

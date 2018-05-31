@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import '../style.css';
+import './style.css';
 import { connect } from 'react-redux';
-import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions';
+import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../actions';
 
  class A extends Component {
+  container = {}
   state = {
     AtoMouseTop: 0,
     AtoMouseLeft: 0,
@@ -20,9 +21,9 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
       let initLeft = (nextProps.container.offsetWidth/2) - 100;
       if (initLeft!==this.state.initLeft){
           this.setState({
-              container:nextProps.container,
               initLeft: initLeft,
           });
+          this.container = nextProps.container
           this.props.A_init({initLeft});
       }
   }
@@ -34,7 +35,6 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
     if(this.state.isDraged){
       this.moving(e);
     }
-    
   }
   end = (e) => {
     if(this.state.isDraged){
@@ -69,7 +69,7 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
   // public function
   moveStart = (page) => {
     let aComponent = this.refs.AComponent;
-    let divcontainer = this.state.container;
+    let divcontainer = this.container;
     // 获取鼠标的位置和AComponent的差值
     this.setState({
       AtoMouseTop: divcontainer.offsetTop + aComponent.offsetTop - page.pageY,
@@ -82,7 +82,7 @@ import { A_init, A_startDrag, A_movaDrag, A_endDrag } from '../../models/actions
   moving = (page) => {
     // 外框
     let aComponent = this.refs.AComponent;
-    let divcontainer = this.state.container;
+    let divcontainer = this.container;
     let b = this.props.B;
     let c = this.props.C;
     let aleft = page.pageX - divcontainer.offsetLeft + this.state.AtoMouseLeft;
